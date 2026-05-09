@@ -1,18 +1,24 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Medicine Store
+// The single source of truth for the medicines list.
+// Responsible for reading and writing Medicine objects to SwiftData,
+// and coordinating with NotificationManager when medicines are added, edited, or removed.
 @Observable
 class MedicineStore {
 
-    // All medicines loaded from persistent storage
     var medicines: [Medicine] = []
 
-    // SwiftData context — set by MedReminderApp on launch via configure()
+    // The SwiftData context is injected at launch via configure(with:).
+    // It is optional only because it cannot be set during init — the container
+    // must be created first in MedReminderApp before it can be passed here.
     private var context: ModelContext?
 
     // MARK: - Setup
 
-    /// Called once on app launch to connect the store to the SwiftData context.
+    /// Connects the store to the SwiftData context and loads saved medicines from disk.
+    /// Must be called once on app launch before any CRUD operations are performed.
     func configure(with context: ModelContext) {
         self.context = context
         loadMedicines()
@@ -28,7 +34,7 @@ class MedicineStore {
             )
             medicines = try context.fetch(descriptor)
         } catch {
-            print("Failed to fetch medicines: \(error)")
+            print("MedicineStore: failed to fetch medicines — \(error)")
             medicines = []
         }
     }
@@ -43,6 +49,9 @@ class MedicineStore {
         NotificationManager.shared.scheduleNotifications(for: medicine)
     }
 
+    /// Updates an existing medicine's properties and reschedules its notifications.
+    /// The medicine object is mutated directly (SwiftData tracks the change),
+    /// so only a save() and notification reschedule are needed here.
     func update(_ medicine: Medicine) {
         save()
         NotificationManager.shared.scheduleNotifications(for: medicine)
@@ -68,14 +77,14 @@ class MedicineStore {
             .forEach { delete($0) }
     }
 
-    // MARK: - Save
+    // MARK: - Persistence
 
     private func save() {
         guard let context else { return }
         do {
             try context.save()
         } catch {
-            print("Failed to save context: \(error)")
+            print("MedicineStore: failed to save context — \(error)")
         }
     }
 }

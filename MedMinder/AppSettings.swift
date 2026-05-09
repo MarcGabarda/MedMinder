@@ -1,12 +1,15 @@
 import SwiftUI
 
+// MARK: - App Background Themes
+// Each case defines a named gradient theme used across the app's background and accent colours.
+// Adding a new theme requires only a new case with its colours — no view changes needed.
 enum AppBackground: String, CaseIterable {
-    case blush = "Blush"
-    case sky = "Sky"
-    case mint = "Mint"
+    case blush    = "Blush"
+    case sky      = "Sky"
+    case mint     = "Mint"
     case lavender = "Lavender"
-    case peach = "Peach"
-    case lilac = "Lilac"
+    case peach    = "Peach"
+    case lilac    = "Lilac"
 
     var colors: [Color] {
         switch self {
@@ -19,6 +22,7 @@ enum AppBackground: String, CaseIterable {
         }
     }
 
+    // The accent colour is used for buttons, titles, and icons on top of each theme's background
     var accentColor: Color {
         switch self {
         case .blush:    return Color(hex: "#BE185D")!
@@ -31,8 +35,12 @@ enum AppBackground: String, CaseIterable {
     }
 }
 
+// MARK: - Reminder Style
+// Controls how the user is presented with a reminder when a notification fires.
+// fullScreenAlarm  → takeover screen with confirm/snooze buttons
+// simpleNotification → system banner only, no in-app takeover
 enum ReminderStyle: String, CaseIterable {
-    case fullScreenAlarm = "Full-screen alarm"
+    case fullScreenAlarm    = "Full-screen alarm"
     case simpleNotification = "Simple notification"
 
     var icon: String {
@@ -43,20 +51,27 @@ enum ReminderStyle: String, CaseIterable {
     }
 }
 
+// MARK: - Ringtone Options
+// Maps to UNNotificationSound in NotificationManager.resolvedSound().
+// Gentle and Chime require matching .caf files in the app bundle.
+// If those files are absent the system falls back to the default sound.
 enum RingtoneOption: String, CaseIterable {
     case `default` = "Default"
-    case gentle = "Gentle"
-    case urgent = "Urgent"
-    case chime = "Chime"
+    case gentle    = "Gentle"
+    case urgent    = "Urgent"
+    case chime     = "Chime"
 }
 
+// MARK: - App Settings
+// Observable settings object injected into the environment at app launch.
+// Holds all user preferences that affect appearance and notification behaviour.
 @Observable
 class AppSettings {
     var selectedBackground: AppBackground = .lavender
-    var reminderStyle: ReminderStyle = .fullScreenAlarm
-    var repeatUntilConfirmed: Bool = true
-    var selectedRingtone: RingtoneOption = .default
-    var notificationsEnabled: Bool = true
-    var badgeCount: Bool = true
-    var hapticFeedback: Bool = true
+    var reminderStyle: ReminderStyle      = .fullScreenAlarm
+    var repeatUntilConfirmed: Bool        = true  // schedules follow-up reminders every 5 min until confirmed
+    var selectedRingtone: RingtoneOption  = .default
+    var notificationsEnabled: Bool        = true
+    var badgeCount: Bool                  = true
+    var hapticFeedback: Bool              = true
 }

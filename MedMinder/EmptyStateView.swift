@@ -1,5 +1,8 @@
 import SwiftUI
 
+// MARK: - Empty State View
+// Shown on the main screen when the user has no medicines saved.
+// Guides new users toward adding their first medicine.
 struct EmptyStateView: View {
     @Binding var showingAddSheet: Bool
 

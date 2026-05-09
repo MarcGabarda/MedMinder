@@ -1,7 +1,11 @@
 import SwiftUI
 
+// MARK: - Alarm View
+// Full-screen presentation shown when a medicine reminder fires.
+// All notification logic (confirm, snooze, repeat reminders) is handled
+// by NotificationManager — this view is responsible for UI only.
 struct AlarmView: View {
-    let medicine: Medicine
+    let medicine:  Medicine
     let onDismiss: () -> Void
 
     @Environment(AppSettings.self) private var settings
@@ -19,122 +23,124 @@ struct AlarmView: View {
 
             VStack(spacing: 28) {
                 Spacer()
-
-                // Pulsing icon
-                ZStack {
-                    Circle()
-                        .fill(medicine.color.opacity(0.2))
-                        .frame(width: 130, height: 130)
-                        .scaleEffect(pulse ? 1.18 : 1.0)
-                        .animation(
-                            .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
-                            value: pulse
-                        )
-                    Circle()
-                        .fill(medicine.color.opacity(0.35))
-                        .frame(width: 96, height: 96)
-                    Image(systemName: "pills.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(medicine.color)
-                }
-
-                // Time + subtitle
-                VStack(spacing: 6) {
-                    Text(Date(), style: .time)
-                        .font(.system(size: 34, weight: .light, design: .rounded))
-                        .foregroundStyle(.primary)
-                    Text("Time to take your medicine")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Medicine details card
-                VStack(spacing: 12) {
-                    HStack(spacing: 10) {
-                        Circle().fill(medicine.color).frame(width: 14, height: 14)
-                        Text(medicine.name).font(.title2).fontWeight(.bold)
-                        Spacer()
-                    }
-                    HStack {
-                        Label(medicine.dosageText, systemImage: "scalemass.fill")
-                            .font(.headline).foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                    if !medicine.notes.isEmpty {
-                        HStack {
-                            Label(medicine.notes, systemImage: "note.text")
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                    }
-                }
-                .padding(22)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 22))
-                .padding(.horizontal, 24)
-
+                pulsingIcon
+                timeDisplay
+                medicineCard
                 Spacer()
-
-                // Action buttons
-                VStack(spacing: 14) {
-
-                    // Confirm button
-                    Button {
-                        guard !confirmed else { return }
-                        withAnimation(.spring(response: 0.3)) { confirmed = true }
-
-                        // Cancel today's notification + any repeat reminders
-                        NotificationManager.shared.confirmTaken(for: medicine)
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            onDismiss()
-                        }
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: confirmed ? "checkmark.circle.fill" : "hand.tap.fill")
-                            Text(confirmed ? "Done! Great job 💪" : "Confirm — Medicine Taken")
-                                .fontWeight(.semibold)
-                        }
-                        .font(.headline)
-                        .foregroundStyle(confirmed ? .white : medicine.color)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(confirmed ? Color.green : medicine.color.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(confirmed ? Color.clear : medicine.color, lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .animation(.easeInOut(duration: 0.3), value: confirmed)
-                    }
-                    .disabled(confirmed)
-
-                    // Snooze button
-                    if !confirmed {
-                        Button {
-                            NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
-                            onDismiss()
-                        } label: {
-                            Text("Snooze 10 minutes")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                actionButtons
             }
         }
         .onAppear {
             pulse = true
-            // If "repeat until confirmed" is on, schedule follow-up reminders
-            // so the user gets nudged every 5 min if they ignore the alarm
+            // Schedule follow-up reminders in case the user ignores this screen.
+            // This respects the "Repeat until confirmed" setting — does nothing if off.
             NotificationManager.shared.scheduleRepeatReminders(for: medicine)
         }
+    }
+
+    // MARK: - Subviews
+
+    private var pulsingIcon: some View {
+        ZStack {
+            Circle()
+                .fill(medicine.color.opacity(0.2))
+                .frame(width: 130, height: 130)
+                .scaleEffect(pulse ? 1.18 : 1.0)
+                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: pulse)
+            Circle()
+                .fill(medicine.color.opacity(0.35))
+                .frame(width: 96, height: 96)
+            Image(systemName: "pills.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(medicine.color)
+        }
+    }
+
+    private var timeDisplay: some View {
+        VStack(spacing: 6) {
+            Text(Date(), style: .time)
+                .font(.system(size: 34, weight: .light, design: .rounded))
+                .foregroundStyle(.primary)
+            Text("Time to take your medicine")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var medicineCard: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Circle().fill(medicine.color).frame(width: 14, height: 14)
+                Text(medicine.name).font(.title2).fontWeight(.bold)
+                Spacer()
+            }
+            HStack {
+                Label(medicine.dosageText, systemImage: "scalemass.fill")
+                    .font(.headline).foregroundStyle(.secondary)
+                Spacer()
+            }
+            if !medicine.notes.isEmpty {
+                HStack {
+                    Label(medicine.notes, systemImage: "note.text")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    Spacer()
+                }
+            }
+        }
+        .padding(22)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .padding(.horizontal, 24)
+    }
+
+    private var actionButtons: some View {
+        VStack(spacing: 14) {
+            // Confirm cancels today's alarm and any repeat reminders, then dismisses
+            Button {
+                guard !confirmed else { return }
+                withAnimation(.spring(response: 0.3)) { confirmed = true }
+                NotificationManager.shared.confirmTaken(for: medicine)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { onDismiss() }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: confirmed ? "checkmark.circle.fill" : "hand.tap.fill")
+                    Text(confirmed ? "Done! Great job" : "Confirm — Medicine Taken")
+                        .fontWeight(.semibold)
+                }
+                .font(.headline)
+                .foregroundStyle(confirmed ? .white : medicine.color)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(confirmed ? Color.green : medicine.color.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(confirmed ? Color.clear : medicine.color, lineWidth: 2)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .animation(.easeInOut(duration: 0.3), value: confirmed)
+            }
+            .disabled(confirmed)
+
+            if !confirmed {
+                // Snooze schedules a new notification 10 minutes from now, then dismisses
+                Button {
+                    NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
+                    onDismiss()
+                } label: {
+                    Text("Snooze 10 minutes")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 40)
     }
 }
 
 #Preview {
-    AlarmView(medicine: Medicine.mockMedicines[0]) {}
+    let medicine = Medicine(name: "Aspirin", dosage: 100, unit: "mg",
+                            colorHex: "#DC2626", notes: "Take with food")
+    AlarmView(medicine: medicine) {}
         .environment(AppSettings())
 }
