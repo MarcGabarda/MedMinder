@@ -5,7 +5,7 @@ struct AlarmView: View {
     let onDismiss: () -> Void
 
     @Environment(AppSettings.self) private var settings
-    @State private var pulse = false
+    @State private var pulse     = false
     @State private var confirmed = false
 
     var body: some View {
@@ -83,7 +83,7 @@ struct AlarmView: View {
                         guard !confirmed else { return }
                         withAnimation(.spring(response: 0.3)) { confirmed = true }
 
-                        // Delegate all notification logic to NotificationManager
+                        // Cancel today's notification + any repeat reminders
                         NotificationManager.shared.confirmTaken(for: medicine)
 
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
@@ -112,7 +112,6 @@ struct AlarmView: View {
                     // Snooze button
                     if !confirmed {
                         Button {
-                            // Delegate snooze scheduling to NotificationManager
                             NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
                             onDismiss()
                         } label: {
@@ -126,7 +125,12 @@ struct AlarmView: View {
                 .padding(.bottom, 40)
             }
         }
-        .onAppear { pulse = true }
+        .onAppear {
+            pulse = true
+            // If "repeat until confirmed" is on, schedule follow-up reminders
+            // so the user gets nudged every 5 min if they ignore the alarm
+            NotificationManager.shared.scheduleRepeatReminders(for: medicine)
+        }
     }
 }
 

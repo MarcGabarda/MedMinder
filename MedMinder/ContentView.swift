@@ -3,7 +3,7 @@ import UserNotifications
 
 struct ContentView: View {
     @Environment(MedicineStore.self) private var store
-    @Environment(AppSettings.self) private var settings
+    @Environment(AppSettings.self)  private var settings
     @State private var showingAddSheet    = false
     @State private var medicineToEdit: Medicine? = nil
     @State private var isSelecting        = false
@@ -12,7 +12,6 @@ struct ContentView: View {
     @State private var alarmMedicine: Medicine? = nil
     @State private var isShowingAlarm     = false
     @State private var showingUpToDate    = false
-    @State private var pendingMedicines: [Medicine] = []  // medicines due right now
 
     var body: some View {
         NavigationStack {
@@ -48,8 +47,7 @@ struct ContentView: View {
                             .disabled(selectedIDs.isEmpty)
                         } else {
                             HStack(spacing: 20) {
-
-                                // Bell button — checks pending notifications to decide what to show
+                                // Bell — checks pending notifications to show correct screen
                                 Button {
                                     guard !isShowingAlarm else { return }
                                     checkAndShowAlarmStatus()
@@ -103,45 +101,54 @@ struct ContentView: View {
             }
             .fullScreenCover(item: $alarmMedicine) { medicine in
                 AlarmView(medicine: medicine) {
-                    alarmMedicine = nil
+                    alarmMedicine  = nil
                     isShowingAlarm = false
                 }
             }
-            // Triggered by real scheduled notifications only
+            // Triggered by real scheduled notifications
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MedicineAlarm"))) { notif in
                 guard !isShowingAlarm else { return }
                 guard notif.userInfo?["isTest"] as? Bool != true else { return }
                 if let id  = notif.userInfo?["medicineID"] as? UUID,
                    let med = store.medicines.first(where: { $0.id == id }) {
-                    isShowingAlarm = true
-                    alarmMedicine  = med
+
+                    // Respect the reminder style setting:
+                    // fullScreenAlarm → show AlarmView over the whole screen
+                    // simpleNotification → let the system banner handle it, no in-app takeover
+                    if settings.reminderStyle == .fullScreenAlarm {
+                        isShowingAlarm = true
+                        alarmMedicine  = med
+                    }
+                    // If simpleNotification, the banner already showed — do nothing in-app
                 }
             }
         }
     }
 
     // MARK: - Bell button logic
-    // Checks if any of today's medicine notifications are still pending.
-    // If yes → show the alarm for the first pending one.
-    // If no  → show the "you're up to date" screen.
+    // Checks pending notifications for today to decide what to show.
 
     private func checkAndShowAlarmStatus() {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             let today = Calendar.current.component(.weekday, from: Date())
 
-            // Find medicines that still have a pending notification for today
             let dueMedicines = store.medicines.filter { medicine in
-                let todayIdentifier = "\(medicine.id.uuidString)-day\(today)"
-                return requests.contains { $0.identifier == todayIdentifier }
+                let todayID = "\(medicine.id.uuidString)-day\(today)"
+                return requests.contains { $0.identifier == todayID }
             }
 
             DispatchQueue.main.async {
                 if let first = dueMedicines.first {
-                    // Something is still pending — show alarm for it
-                    isShowingAlarm = true
-                    alarmMedicine  = first
+                    // Something still pending today
+                    if settings.reminderStyle == .fullScreenAlarm {
+                        isShowingAlarm = true
+                        alarmMedicine  = first
+                    } else {
+                        // Simple notification style — just show up to date,
+                        // real reminders come via system banners
+                        showingUpToDate = true
+                    }
                 } else {
-                    // Nothing pending — all confirmed or no medicines scheduled today
                     showingUpToDate = true
                 }
             }

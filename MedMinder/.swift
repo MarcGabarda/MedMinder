@@ -5,11 +5,9 @@ import UIKit
 class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
 
-    // Injected from AppSettings so NotificationManager can read current preferences
-    var settings: AppSettings?
-
     private override init() {
         super.init()
+        // Delegate is set in MedReminderApp.init() — not here
     }
 
     // MARK: - Permission
@@ -70,7 +68,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         cancelNotifications(for: medicine)
         let content = buildContent(for: medicine, isTest: false)
         let calendar = Calendar.current
-        let hour   = calendar.component(.hour,   from: medicine.reminderTime)
+        let hour = calendar.component(.hour, from: medicine.reminderTime)
         let minute = calendar.component(.minute, from: medicine.reminderTime)
 
         for dayRaw in medicine.reminderDays {
@@ -86,7 +84,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    // MARK: - Schedule test notification
+    // MARK: - Schedule test notification (bell button in toolbar)
 
     func scheduleTestNotification(for medicine: Medicine) {
         let content = buildContent(for: medicine, isTest: true)
@@ -99,15 +97,15 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // MARK: - Schedule snooze
+    // MARK: - Schedule snooze (called from AlarmView)
 
     func scheduleSnoozeNotification(for medicine: Medicine) {
         let content = UNMutableNotificationContent()
-        content.title    = "💊 \(medicine.name.uppercased())"
+        content.title = "💊 \(medicine.name.uppercased())"
         content.subtitle = "Take \(medicine.dosageText) now"
-        content.body     = "You snoozed this. Time to take it!"
-        content.sound    = resolvedSound()
-        content.badge    = 1
+        content.body = "You snoozed this. Time to take it!"
+        content.sound = .default
+        content.badge = 1
         content.userInfo = ["medicineID": medicine.id.uuidString]
         content.categoryIdentifier = "MEDICINE_REMINDER"
 
@@ -120,53 +118,28 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // MARK: - Confirm taken
-    // Cancels today's firing. If "repeat until confirmed" is ON, also cancels
-    // the repeat notifications that were scheduled for this session.
+    // MARK: - Confirm taken (called from AlarmView)
+    // Cancels only today's firing — all other scheduled days remain untouched
 
     func confirmTaken(for medicine: Medicine) {
         let today = Calendar.current.component(.weekday, from: Date())
-        var ids = [
-            "\(medicine.id.uuidString)-day\(today)",
-            "test-\(medicine.id)",
-            "snooze-\(medicine.id)"
-        ]
-        // Cancel any repeat-reminder notifications that were scheduled
-        for i in 1...10 {
-            ids.append("repeat-\(medicine.id)-\(i)")
-        }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [
+                "\(medicine.id.uuidString)-day\(today)",
+                "test-\(medicine.id)",
+                "snooze-\(medicine.id)"
+            ]
+        )
     }
 
-    // MARK: - Schedule repeat reminders (used when "repeat until confirmed" is ON)
-    // Fires every 5 minutes for up to 10 times until the user confirms
-
-    func scheduleRepeatReminders(for medicine: Medicine) {
-        guard settings?.repeatUntilConfirmed == true else { return }
-        let content = buildContent(for: medicine, isTest: false)
-
-        for i in 1...10 {
-            let trigger = UNTimeIntervalNotificationTrigger(
-                timeInterval: Double(i) * 300, // every 5 minutes
-                repeats: false
-            )
-            let request = UNNotificationRequest(
-                identifier: "repeat-\(medicine.id)-\(i)",
-                content: content,
-                trigger: trigger
-            )
-            UNUserNotificationCenter.current().add(request)
-        }
-    }
-
-    // MARK: - Cancel all recurring reminders
+    // MARK: - Cancel all recurring reminders for a medicine
 
     func cancelNotifications(for medicine: Medicine) {
         let ids = medicine.reminderDays.map { "\(medicine.id.uuidString)-day\($0)" }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
     }
 
-    // MARK: - Notification categories
+    // MARK: - Notification categories (Taken / Snooze actions)
 
     func setupNotificationCategories() {
         let confirmAction = UNNotificationAction(
@@ -192,28 +165,15 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     private func buildContent(for medicine: Medicine, isTest: Bool) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title    = "💊 \(medicine.name.uppercased())"
+        content.title = "💊 \(medicine.name.uppercased())"
         content.subtitle = "Take \(medicine.dosageText) now"
-        content.body     = medicine.notes.isEmpty
+        content.body = medicine.notes.isEmpty
             ? "Don't forget your medication! Open the app to confirm."
             : "\(medicine.notes) — Open the app to confirm."
-        content.sound    = resolvedSound()
-        content.badge    = 1
+        content.sound = .default
+        content.badge = 1
         content.userInfo = ["medicineID": medicine.id.uuidString, "isTest": isTest]
         content.categoryIdentifier = "MEDICINE_REMINDER"
         return content
-    }
-
-    // Maps the selected RingtoneOption to a UNNotificationSound.
-    // "gentle" and "chime" use named bundled sound files if present,
-    // falling back to .default so the app never crashes on a missing file.
-    private func resolvedSound() -> UNNotificationSound {
-        guard let ringtone = settings?.selectedRingtone else { return .default }
-        switch ringtone {
-        case .default: return .default
-        case .gentle:  return UNNotificationSound(named: UNNotificationSoundName("gentle.caf"))
-        case .urgent:  return .defaultCritical
-        case .chime:   return UNNotificationSound(named: UNNotificationSoundName("chime.caf"))
-        }
     }
 }

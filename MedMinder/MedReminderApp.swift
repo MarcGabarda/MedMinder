@@ -7,7 +7,6 @@ struct MedReminderApp: App {
     @State private var store    = MedicineStore()
     @State private var settings = AppSettings()
 
-    // SwiftData container — persists Medicine objects to disk automatically
     let container: ModelContainer = {
         do {
             return try ModelContainer(for: Medicine.self)
@@ -30,8 +29,10 @@ struct MedReminderApp: App {
                 .environment(store)
                 .environment(settings)
                 .onAppear {
-                    // Hand the context to the store so it can read/write from disk
                     store.configure(with: container.mainContext)
+                    // Give NotificationManager access to settings so it can
+                    // read ringtone and repeatUntilConfirmed preferences
+                    NotificationManager.shared.settings = settings
                 }
         }
         .modelContainer(container)
