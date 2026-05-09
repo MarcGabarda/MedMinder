@@ -1,5 +1,4 @@
 import SwiftUI
-import UserNotifications
 
 struct AlarmView: View {
     let medicine: Medicine
@@ -21,6 +20,7 @@ struct AlarmView: View {
             VStack(spacing: 28) {
                 Spacer()
 
+                // Pulsing icon
                 ZStack {
                     Circle()
                         .fill(medicine.color.opacity(0.2))
@@ -38,6 +38,7 @@ struct AlarmView: View {
                         .foregroundStyle(medicine.color)
                 }
 
+                // Time + subtitle
                 VStack(spacing: 6) {
                     Text(Date(), style: .time)
                         .font(.system(size: 34, weight: .light, design: .rounded))
@@ -47,6 +48,7 @@ struct AlarmView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                // Medicine details card
                 VStack(spacing: 12) {
                     HStack(spacing: 10) {
                         Circle().fill(medicine.color).frame(width: 14, height: 14)
@@ -73,6 +75,7 @@ struct AlarmView: View {
 
                 Spacer()
 
+                // Action buttons
                 VStack(spacing: 14) {
 
                     // Confirm button
@@ -80,16 +83,8 @@ struct AlarmView: View {
                         guard !confirmed else { return }
                         withAnimation(.spring(response: 0.3)) { confirmed = true }
 
-                        // Cancel only today's firing so it won't pop up again today
-                        // All other scheduled days remain untouched
-                        let today = Calendar.current.component(.weekday, from: Date())
-                        UNUserNotificationCenter.current().removePendingNotificationRequests(
-                            withIdentifiers: [
-                                "\(medicine.id.uuidString)-day\(today)",
-                                "test-\(medicine.id)",
-                                "snooze-\(medicine.id)"
-                            ]
-                        )
+                        // Delegate all notification logic to NotificationManager
+                        NotificationManager.shared.confirmTaken(for: medicine)
 
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             onDismiss()
@@ -117,22 +112,8 @@ struct AlarmView: View {
                     // Snooze button
                     if !confirmed {
                         Button {
-                            let content = UNMutableNotificationContent()
-                            content.title = "💊 \(medicine.name.uppercased())"
-                            content.subtitle = "Take \(medicine.dosageText) now"
-                            content.body = "You snoozed this. Time to take it!"
-                            content.sound = .default
-                            content.badge = 1
-                            content.userInfo = ["medicineID": medicine.id.uuidString]
-                            content.categoryIdentifier = "MEDICINE_REMINDER"
-
-                            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 600, repeats: false)
-                            let request = UNNotificationRequest(
-                                identifier: "snooze-\(medicine.id)",
-                                content: content,
-                                trigger: trigger
-                            )
-                            UNUserNotificationCenter.current().add(request)
+                            // Delegate snooze scheduling to NotificationManager
+                            NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
                             onDismiss()
                         } label: {
                             Text("Snooze 10 minutes")
