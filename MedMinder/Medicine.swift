@@ -69,21 +69,6 @@ class Medicine {
     }
 }
 
-extension Medicine {
-    static var mockMedicines: [Medicine] {
-        let cal = Calendar.current
-        func t(_ h: Int, _ m: Int) -> Date {
-            cal.date(bySettingHour: h, minute: m, second: 0, of: Date()) ?? Date()
-        }
-        return [
-            Medicine(name: "Aspirin", dosage: 100, unit: "mg", colorHex: "#DC2626", notes: "Take with food", reminderTime: t(8, 0), reminderDays: [2,3,4,5,6]),
-            Medicine(name: "Vitamin D", dosage: 1000, unit: "units", colorHex: "#D97706", notes: "Morning with breakfast", reminderTime: t(8, 30), reminderDays: [1,2,3,4,5,6,7]),
-            Medicine(name: "Metformin", dosage: 500, unit: "mg", colorHex: "#059669", notes: "After dinner", reminderTime: t(19, 0), reminderDays: [2,3,4,5,6]),
-            Medicine(name: "Omega-3", dosage: 1, unit: "capsules", colorHex: "#2563EB", notes: "", reminderTime: t(12, 0), reminderDays: [2,4,6]),
-        ]
-    }
-}
-
 extension Color {
     init?(hex: String) {
         var h = hex.trimmingCharacters(in: .whitespacesAndNewlines)
