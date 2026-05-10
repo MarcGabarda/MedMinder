@@ -46,7 +46,6 @@ struct ContentView: View {
             }
             // Listens for MedicineAlarm notifications posted by NotificationManager.
             // Fires when a scheduled notification arrives (foreground) or is tapped (background).
-            // Ignored if the alarm is already showing, or if the notification is a test.
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MedicineAlarm"))) { notif in
                 guard !isShowingAlarm else { return }
                 guard notif.userInfo?["isTest"] as? Bool != true else { return }
@@ -56,7 +55,6 @@ struct ContentView: View {
                         isShowingAlarm = true
                         alarmMedicine  = med
                     }
-                    // simpleNotification: the system banner already showed — no in-app takeover needed
                 }
             }
         }
@@ -138,7 +136,6 @@ struct ContentView: View {
     }
 
     // MARK: - Bell Button Logic
-    // Queries pending notifications to determine whether any medicines are still due today.
     // Shows the alarm screen if something is pending, or the "up to date" screen if not.
     private func checkAndShowAlarmStatus() {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in

@@ -10,7 +10,6 @@ enum DosageUnit: String, CaseIterable, Codable {
 
 // MARK: - Weekday
 // Represents days of the week using Apple's weekday numbering (1 = Sunday, 7 = Saturday).
-// Codable so the selected days can be stored in SwiftData as an [Int] array.
 enum Weekday: Int, CaseIterable, Codable, Identifiable {
     case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
 
@@ -69,7 +68,6 @@ class Medicine {
     }
 
     // Formats dosage for display — drops the decimal point when the value is a whole number
-    // e.g. 100.0 → "100 mg", 1.5 → "1.5 ml"
     var dosageText: String {
         let formatted = dosage.truncatingRemainder(dividingBy: 1) == 0
             ? String(Int(dosage))
@@ -78,7 +76,6 @@ class Medicine {
     }
 
     // Converts stored weekday integers into sorted, human-readable abbreviations
-    // e.g. [2, 4, 6] → "Mo, We, Fr"
     var reminderDayNames: String {
         reminderDays
             .compactMap { Weekday(rawValue: $0) }
@@ -90,7 +87,6 @@ class Medicine {
 
 // MARK: - Color Helpers
 // Extensions to convert between SwiftUI Color and hex strings.
-// Required because SwiftData cannot store Color directly.
 extension Color {
     init?(hex: String) {
         var h = hex.trimmingCharacters(in: .whitespacesAndNewlines)

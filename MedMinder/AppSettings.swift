@@ -2,7 +2,6 @@ import SwiftUI
 
 // MARK: - App Background Themes
 // Each case defines a named gradient theme used across the app's background and accent colours.
-// Adding a new theme requires only a new case with its colours — no view changes needed.
 enum AppBackground: String, CaseIterable {
     case blush    = "Blush"
     case sky      = "Sky"
@@ -37,8 +36,6 @@ enum AppBackground: String, CaseIterable {
 
 // MARK: - Reminder Style
 // Controls how the user is presented with a reminder when a notification fires.
-// fullScreenAlarm  → takeover screen with confirm/snooze buttons
-// simpleNotification → system banner only, no in-app takeover
 enum ReminderStyle: String, CaseIterable {
     case fullScreenAlarm    = "Full-screen alarm"
     case simpleNotification = "Simple notification"
@@ -53,8 +50,6 @@ enum ReminderStyle: String, CaseIterable {
 
 // MARK: - Ringtone Options
 // Maps to UNNotificationSound in NotificationManager.resolvedSound().
-// Gentle and Chime require matching .caf files in the app bundle.
-// If those files are absent the system falls back to the default sound.
 enum RingtoneOption: String, CaseIterable {
     case `default` = "Default"
     case gentle    = "Gentle"

@@ -2,7 +2,6 @@ import SwiftUI
 import SwiftData
 
 // MARK: - Medicine Store
-// The single source of truth for the medicines list.
 // Responsible for reading and writing Medicine objects to SwiftData,
 // and coordinating with NotificationManager when medicines are added, edited, or removed.
 @Observable
@@ -17,8 +16,6 @@ class MedicineStore {
 
     // MARK: - Setup
 
-    /// Connects the store to the SwiftData context and loads saved medicines from disk.
-    /// Must be called once on app launch before any CRUD operations are performed.
     func configure(with context: ModelContext) {
         self.context = context
         loadMedicines()
@@ -50,8 +47,6 @@ class MedicineStore {
     }
 
     /// Updates an existing medicine's properties and reschedules its notifications.
-    /// The medicine object is mutated directly (SwiftData tracks the change),
-    /// so only a save() and notification reschedule are needed here.
     func update(_ medicine: Medicine) {
         save()
         NotificationManager.shared.scheduleNotifications(for: medicine)

@@ -2,7 +2,6 @@ import SwiftUI
 
 // MARK: - Up To Date View
 // Shown as a half-sheet when the user taps the bell button but no medicines are pending for today.
-// This covers two scenarios: all medicines have been confirmed, or none are scheduled for today.
 struct UpToDateView: View {
     let onDismiss: () -> Void
 

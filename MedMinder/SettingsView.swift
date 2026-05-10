@@ -2,8 +2,6 @@ import SwiftUI
 
 // MARK: - Settings View
 // Allows the user to customise appearance, reminder behaviour, ringtone, and notification preferences.
-// All changes are written directly to the AppSettings observable object,
-// which is shared via the environment so changes take effect immediately across the app.
 struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.dismiss) private var dismiss

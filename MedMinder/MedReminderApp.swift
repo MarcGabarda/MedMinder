@@ -18,8 +18,6 @@ struct MedReminderApp: App {
     }()
 
     init() {
-        // Set the delegate before requesting permission so foreground and
-        // tap-response callbacks are handled from the first launch.
         UNUserNotificationCenter.current().delegate = NotificationManager.shared
         NotificationManager.shared.setupNotificationCategories()
         Task {
@@ -33,9 +31,6 @@ struct MedReminderApp: App {
                 .environment(store)
                 .environment(settings)
                 .onAppear {
-                    // Connect the store to SwiftData and load saved medicines.
-                    // Also pass settings to NotificationManager so it can read
-                    // ringtone and repeatUntilConfirmed preferences when scheduling.
                     store.configure(with: container.mainContext)
                     NotificationManager.shared.settings = settings
                 }

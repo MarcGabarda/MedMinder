@@ -2,8 +2,7 @@ import SwiftUI
 
 // MARK: - Alarm View
 // Full-screen presentation shown when a medicine reminder fires.
-// All notification logic (confirm, snooze, repeat reminders) is handled
-// by NotificationManager — this view is responsible for UI only.
+// All notification logic (confirm, snooze, repeat reminders) is handled by NotificationManager
 struct AlarmView: View {
     let medicine:  Medicine
     let onDismiss: () -> Void
@@ -33,7 +32,6 @@ struct AlarmView: View {
         .onAppear {
             pulse = true
             // Schedule follow-up reminders in case the user ignores this screen.
-            // This respects the "Repeat until confirmed" setting — does nothing if off.
             NotificationManager.shared.scheduleRepeatReminders(for: medicine)
         }
     }

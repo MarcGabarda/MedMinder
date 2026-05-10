@@ -5,12 +5,9 @@ import UIKit
 // MARK: - Notification Manager
 // Centralises all interaction with UNUserNotificationCenter.
 // Views and the store never call UNUserNotificationCenter directly —
-// they always go through this class, keeping notification logic in one place.
 class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
 
-    // Injected from AppSettings on launch so the manager can read
-    // the user's ringtone and repeatUntilConfirmed preferences.
     var settings: AppSettings?
 
     private override init() {
@@ -149,7 +146,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // MARK: - Cancellation
 
     // Cancels today's alarm and any temporary notifications (test, snooze, repeat reminders).
-    // The recurring weekly notifications for other days are left intact.
     func confirmTaken(for medicine: Medicine) {
         let today = Calendar.current.component(.weekday, from: Date())
         var ids   = [
@@ -210,8 +206,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // Maps the user's ringtone preference to a UNNotificationSound.
-    // Gentle and Chime require gentle.caf and chime.caf in the app bundle.
-    // Missing files fall back to the system default — the app will not crash.
     private func resolvedSound() -> UNNotificationSound {
         guard let ringtone = settings?.selectedRingtone else { return .default }
         switch ringtone {

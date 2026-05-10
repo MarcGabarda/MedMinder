@@ -51,7 +51,6 @@ struct MedicineListView: View {
 
 // MARK: - Medicine Row View
 // A single card displaying a medicine's name, dosage, notes, reminder time, and scheduled days.
-// Shows a selection circle when in multi-select mode, or a colour dot otherwise.
 struct MedicineRowView: View {
     let medicine:    Medicine
     let isSelecting: Bool
