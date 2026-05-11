@@ -29,8 +29,6 @@ struct MedReminderApp: App {
             ContentView()
                 .environment(store)
                 .environment(settings)
-                // .task runs once when the view first appears and is cancelled when
-                // this ensures the database is loaded exactly once.
                 .task {
                     store.configure(with: container.mainContext)
                     NotificationManager.shared.settings = settings

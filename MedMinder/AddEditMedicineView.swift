@@ -60,8 +60,7 @@ struct AddEditMedicineView: View {
                     Button("Cancel") { dismiss() }.foregroundStyle(.indigo)
                 }
             }
-            // .task runs once when the sheet appears — won't re-fire on
-            // intermediate re-renders, so user input is never clobbered.
+
             .task { loadExistingValues() }
             .alert("Missing Info", isPresented: $showingValidationAlert) {
                 Button("OK", role: .cancel) {}

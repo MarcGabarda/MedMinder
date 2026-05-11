@@ -36,11 +36,11 @@ class Medicine {
     var id: UUID
     var name: String
     var dosage: Double
-    var unit: String        // stored as String to remain Codable; cast via DosageUnit(rawValue:)
-    var colorHex: String    // stored as hex string e.g. "#DC2626"; converted to Color via extension
+    var unit: String
+    var colorHex: String
     var notes: String
-    var reminderTime: Date  // only the hour/minute components are used for scheduling
-    var reminderDays: [Int] // weekday rawValues matching the Weekday enum
+    var reminderTime: Date
+    var reminderDays: [Int]
 
     init(
         id: UUID = UUID(),
@@ -67,7 +67,7 @@ class Medicine {
         Color(hex: colorHex) ?? .purple
     }
 
-    // Formats dosage for display — drops the decimal point when the value is a whole number
+    // Formats dosage for display
     var dosageText: String {
         let formatted = dosage.truncatingRemainder(dividingBy: 1) == 0
             ? String(Int(dosage))

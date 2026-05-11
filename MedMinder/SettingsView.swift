@@ -11,7 +11,6 @@ struct SettingsView: View {
             Form {
                 appearanceSection
                 reminderStyleSection
-                // Alarm options are only relevant when the full-screen alarm is active
                 if settings.reminderStyle == .fullScreenAlarm {
                     alarmOptionsSection
                 }

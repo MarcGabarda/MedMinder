@@ -4,14 +4,12 @@ import UIKit
 
 // MARK: - Notification Manager
 // Centralises all interaction with UNUserNotificationCenter.
-// Views and the store never call UNUserNotificationCenter directly —
 class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
 
     var settings: AppSettings?
 
     // How many repeat reminders to schedule per alarm session.
-    // Kept as a constant so cancel and schedule stay in sync.
     private let repeatReminderCount = 10
 
     private override init() {
@@ -80,8 +78,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     // MARK: - Scheduling
 
-    // Respects the global "Enable notifications" toggle — if disabled, cancels
-    // everything for this medicine and exits without scheduling.
     // Schedules one repeating notification per selected weekday.
     func scheduleNotifications(for medicine: Medicine) {
         cancelNotifications(for: medicine)
@@ -169,7 +165,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
     }
 
-    // Cancels all recurring + temporary notifications for a medicine SYNCHRONOUSLY.
+    // Cancels all recurring + temporary notifications for a medicine
     func cancelNotifications(for medicine: Medicine) {
         var ids: [String] = []
 
@@ -245,7 +241,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    // Used only for testing — schedules a notification 5 seconds from now
     func scheduleTestNotification(for medicine: Medicine) {
         let content = buildContent(for: medicine, isTest: true)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)

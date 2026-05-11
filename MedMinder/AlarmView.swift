@@ -128,7 +128,6 @@ struct AlarmView: View {
             .disabled(confirmed)
 
             if !confirmed {
-                // Snooze schedules a new notification 10 minutes from now, then dismisses.
                 Button {
                     stopAlarmSound()
                     NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
