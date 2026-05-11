@@ -9,34 +9,36 @@
 /* Begin PBXBuildFile section */
 		189CEDD92FAF85E700EC0288 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD72FAF85E700EC0288 /* SettingsView.swift */; };
 		189CEDDA2FAF85E700EC0288 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD12FAF85E700EC0288 /* EmptyStateView.swift */; };
-		189CEDDB2FAF85E700EC0288 /* AddEditMedicineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDCD2FAF85E700EC0288 /* AddEditMedicineView.swift */; };
-		189CEDDC2FAF85E700EC0288 /* MedicineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD42FAF85E700EC0288 /* MedicineStore.swift */; };
-		189CEDDD2FAF85E700EC0288 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDCF2FAF85E700EC0288 /* AppSettings.swift */; };
 		189CEDDE2FAF85E700EC0288 /* AlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDCE2FAF85E700EC0288 /* AlarmView.swift */; };
 		189CEDDF2FAF85E700EC0288 /* UpToDateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD82FAF85E700EC0288 /* UpToDateView.swift */; };
 		189CEDE02FAF85E700EC0288 /* Medicine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD22FAF85E700EC0288 /* Medicine.swift */; };
 		189CEDE12FAF85E700EC0288 /* MedicineListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD32FAF85E700EC0288 /* MedicineListView.swift */; };
-		189CEDE22FAF85E700EC0288 /* MedReminderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD52FAF85E700EC0288 /* MedReminderApp.swift */; };
-		189CEDE32FAF85E700EC0288 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD62FAF85E700EC0288 /* NotificationManager.swift */; };
 		189CEDE42FAF85E700EC0288 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189CEDD02FAF85E700EC0288 /* ContentView.swift */; };
 		189E853E2FAE1B8900A66F3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 189E85362FAE1B8900A66F3C /* Assets.xcassets */; };
+		18DCE81F2FB16E4400F87FE9 /* MedReminderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DCE81D2FB16E4400F87FE9 /* MedReminderApp.swift */; };
+		18DCE8202FB16E4400F87FE9 /* MedicineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DCE81C2FB16E4400F87FE9 /* MedicineStore.swift */; };
+		18DCE8212FB16E4400F87FE9 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DCE81B2FB16E4400F87FE9 /* AppSettings.swift */; };
+		18DCE8222FB16E4400F87FE9 /* AddEditMedicineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DCE81A2FB16E4400F87FE9 /* AddEditMedicineView.swift */; };
+		18DCE8232FB16E4400F87FE9 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DCE81E2FB16E4400F87FE9 /* NotificationManager.swift */; };
+		18DCE8252FB1705700F87FE9 /* gentle.caf in Resources */ = {isa = PBXBuildFile; fileRef = 18DCE8242FB1705700F87FE9 /* gentle.caf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		189CEDCD2FAF85E700EC0288 /* AddEditMedicineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditMedicineView.swift; sourceTree = "<group>"; };
 		189CEDCE2FAF85E700EC0288 /* AlarmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmView.swift; sourceTree = "<group>"; };
-		189CEDCF2FAF85E700EC0288 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		189CEDD02FAF85E700EC0288 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		189CEDD12FAF85E700EC0288 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		189CEDD22FAF85E700EC0288 /* Medicine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Medicine.swift; sourceTree = "<group>"; };
 		189CEDD32FAF85E700EC0288 /* MedicineListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineListView.swift; sourceTree = "<group>"; };
-		189CEDD42FAF85E700EC0288 /* MedicineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineStore.swift; sourceTree = "<group>"; };
-		189CEDD52FAF85E700EC0288 /* MedReminderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedReminderApp.swift; sourceTree = "<group>"; };
-		189CEDD62FAF85E700EC0288 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		189CEDD72FAF85E700EC0288 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		189CEDD82FAF85E700EC0288 /* UpToDateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpToDateView.swift; sourceTree = "<group>"; };
 		189CEDE52FAF85ED00EC0288 /* MedMinder-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MedMinder-Bridging-Header.h"; sourceTree = "<group>"; };
 		189E85362FAE1B8900A66F3C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		18DCE81A2FB16E4400F87FE9 /* AddEditMedicineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditMedicineView.swift; sourceTree = "<group>"; };
+		18DCE81B2FB16E4400F87FE9 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		18DCE81C2FB16E4400F87FE9 /* MedicineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineStore.swift; sourceTree = "<group>"; };
+		18DCE81D2FB16E4400F87FE9 /* MedReminderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedReminderApp.swift; sourceTree = "<group>"; };
+		18DCE81E2FB16E4400F87FE9 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		18DCE8242FB1705700F87FE9 /* gentle.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = gentle.caf; sourceTree = "<group>"; };
 		7A4CD02A2FA9CC9000AB2D63 /* MedMinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MedMinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -55,16 +57,17 @@
 			isa = PBXGroup;
 			children = (
 				189E85362FAE1B8900A66F3C /* Assets.xcassets */,
-				189CEDCD2FAF85E700EC0288 /* AddEditMedicineView.swift */,
+				18DCE81A2FB16E4400F87FE9 /* AddEditMedicineView.swift */,
+				18DCE8242FB1705700F87FE9 /* gentle.caf */,
+				18DCE81B2FB16E4400F87FE9 /* AppSettings.swift */,
+				18DCE81C2FB16E4400F87FE9 /* MedicineStore.swift */,
+				18DCE81D2FB16E4400F87FE9 /* MedReminderApp.swift */,
+				18DCE81E2FB16E4400F87FE9 /* NotificationManager.swift */,
 				189CEDCE2FAF85E700EC0288 /* AlarmView.swift */,
-				189CEDCF2FAF85E700EC0288 /* AppSettings.swift */,
 				189CEDD02FAF85E700EC0288 /* ContentView.swift */,
 				189CEDD12FAF85E700EC0288 /* EmptyStateView.swift */,
 				189CEDD22FAF85E700EC0288 /* Medicine.swift */,
 				189CEDD32FAF85E700EC0288 /* MedicineListView.swift */,
-				189CEDD42FAF85E700EC0288 /* MedicineStore.swift */,
-				189CEDD52FAF85E700EC0288 /* MedReminderApp.swift */,
-				189CEDD62FAF85E700EC0288 /* NotificationManager.swift */,
 				189CEDD72FAF85E700EC0288 /* SettingsView.swift */,
 				189CEDD82FAF85E700EC0288 /* UpToDateView.swift */,
 				189CEDE52FAF85ED00EC0288 /* MedMinder-Bridging-Header.h */,
@@ -151,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				189E853E2FAE1B8900A66F3C /* Assets.xcassets in Resources */,
+				18DCE8252FB1705700F87FE9 /* gentle.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,15 +167,15 @@
 			files = (
 				189CEDD92FAF85E700EC0288 /* SettingsView.swift in Sources */,
 				189CEDDA2FAF85E700EC0288 /* EmptyStateView.swift in Sources */,
-				189CEDDB2FAF85E700EC0288 /* AddEditMedicineView.swift in Sources */,
-				189CEDDC2FAF85E700EC0288 /* MedicineStore.swift in Sources */,
-				189CEDDD2FAF85E700EC0288 /* AppSettings.swift in Sources */,
 				189CEDDE2FAF85E700EC0288 /* AlarmView.swift in Sources */,
 				189CEDDF2FAF85E700EC0288 /* UpToDateView.swift in Sources */,
 				189CEDE02FAF85E700EC0288 /* Medicine.swift in Sources */,
+				18DCE81F2FB16E4400F87FE9 /* MedReminderApp.swift in Sources */,
+				18DCE8202FB16E4400F87FE9 /* MedicineStore.swift in Sources */,
+				18DCE8212FB16E4400F87FE9 /* AppSettings.swift in Sources */,
+				18DCE8222FB16E4400F87FE9 /* AddEditMedicineView.swift in Sources */,
+				18DCE8232FB16E4400F87FE9 /* NotificationManager.swift in Sources */,
 				189CEDE12FAF85E700EC0288 /* MedicineListView.swift in Sources */,
-				189CEDE22FAF85E700EC0288 /* MedReminderApp.swift in Sources */,
-				189CEDE32FAF85E700EC0288 /* NotificationManager.swift in Sources */,
 				189CEDE42FAF85E700EC0288 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

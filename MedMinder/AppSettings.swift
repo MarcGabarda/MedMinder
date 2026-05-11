@@ -35,7 +35,6 @@ enum AppBackground: String, CaseIterable {
 }
 
 // MARK: - Reminder Style
-// Controls how the user is presented with a reminder when a notification fires.
 enum ReminderStyle: String, CaseIterable {
     case fullScreenAlarm    = "Full-screen alarm"
     case simpleNotification = "Simple notification"
@@ -57,16 +56,71 @@ enum RingtoneOption: String, CaseIterable {
     case chime     = "Chime"
 }
 
+// MARK: - Storage Keys
+private enum SettingsKey {
+    static let background       = "settings.background"
+    static let reminderStyle    = "settings.reminderStyle"
+    static let repeatUntil      = "settings.repeatUntilConfirmed"
+    static let ringtone         = "settings.ringtone"
+    static let notifications    = "settings.notificationsEnabled"
+    static let badge            = "settings.badgeCount"
+    static let haptic           = "settings.hapticFeedback"
+}
+
 // MARK: - App Settings
 // Observable settings object injected into the environment at app launch.
-// Holds all user preferences that affect appearance and notification behaviour.
+// All properties persist automatically to UserDefaults via didSet observers.
 @Observable
 class AppSettings {
-    var selectedBackground: AppBackground = .lavender
-    var reminderStyle: ReminderStyle      = .fullScreenAlarm
-    var repeatUntilConfirmed: Bool        = true  // schedules follow-up reminders every 5 min until confirmed
-    var selectedRingtone: RingtoneOption  = .default
-    var notificationsEnabled: Bool        = true
-    var badgeCount: Bool                  = true
-    var hapticFeedback: Bool              = true
+
+    var selectedBackground: AppBackground {
+        didSet { UserDefaults.standard.set(selectedBackground.rawValue, forKey: SettingsKey.background) }
+    }
+
+    var reminderStyle: ReminderStyle {
+        didSet { UserDefaults.standard.set(reminderStyle.rawValue, forKey: SettingsKey.reminderStyle) }
+    }
+
+    var repeatUntilConfirmed: Bool {
+        didSet { UserDefaults.standard.set(repeatUntilConfirmed, forKey: SettingsKey.repeatUntil) }
+    }
+
+    var selectedRingtone: RingtoneOption {
+        didSet { UserDefaults.standard.set(selectedRingtone.rawValue, forKey: SettingsKey.ringtone) }
+    }
+
+    var notificationsEnabled: Bool {
+        didSet { UserDefaults.standard.set(notificationsEnabled, forKey: SettingsKey.notifications) }
+    }
+
+    var badgeCount: Bool {
+        didSet { UserDefaults.standard.set(badgeCount, forKey: SettingsKey.badge) }
+    }
+
+    var hapticFeedback: Bool {
+        didSet { UserDefaults.standard.set(hapticFeedback, forKey: SettingsKey.haptic) }
+    }
+
+    init() {
+        let defaults = UserDefaults.standard
+
+        // Read each saved value, falling back to a sensible default if missing or invalid.
+        self.selectedBackground = AppBackground(
+            rawValue: defaults.string(forKey: SettingsKey.background) ?? ""
+        ) ?? .lavender
+
+        self.reminderStyle = ReminderStyle(
+            rawValue: defaults.string(forKey: SettingsKey.reminderStyle) ?? ""
+        ) ?? .fullScreenAlarm
+
+        self.repeatUntilConfirmed = defaults.object(forKey: SettingsKey.repeatUntil) as? Bool ?? true
+
+        self.selectedRingtone = RingtoneOption(
+            rawValue: defaults.string(forKey: SettingsKey.ringtone) ?? ""
+        ) ?? .default
+
+        self.notificationsEnabled = defaults.object(forKey: SettingsKey.notifications) as? Bool ?? true
+        self.badgeCount           = defaults.object(forKey: SettingsKey.badge) as? Bool ?? true
+        self.hapticFeedback       = defaults.object(forKey: SettingsKey.haptic) as? Bool ?? true
+    }
 }

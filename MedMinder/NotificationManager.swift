@@ -10,6 +10,10 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     var settings: AppSettings?
 
+    // How many repeat reminders to schedule per alarm session.
+    // Kept as a constant so cancel and schedule stay in sync.
+    private let repeatReminderCount = 10
+
     private override init() {
         super.init()
     }
@@ -52,7 +56,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // Called when the user taps a notification while the app is in the background or closed.
-    // Posts the same MedicineAlarm notification so ContentView shows the alarm on app open.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
@@ -77,11 +80,14 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     // MARK: - Scheduling
 
+    // Respects the global "Enable notifications" toggle — if disabled, cancels
+    // everything for this medicine and exits without scheduling.
     // Schedules one repeating notification per selected weekday.
-    // Each notification fires at the medicine's reminder time on its specific day.
-    // Cancels existing notifications first to avoid duplicates after an edit.
     func scheduleNotifications(for medicine: Medicine) {
         cancelNotifications(for: medicine)
+
+        guard settings?.notificationsEnabled ?? true else { return }
+
         let content  = buildContent(for: medicine, isTest: false)
         let calendar = Calendar.current
         let hour     = calendar.component(.hour,   from: medicine.reminderTime)
@@ -104,12 +110,14 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     // Schedules a one-off snooze notification 10 minutes from now.
     func scheduleSnoozeNotification(for medicine: Medicine) {
+        guard settings?.notificationsEnabled ?? true else { return }
+
         let content          = UNMutableNotificationContent()
         content.title        = "💊 \(medicine.name.uppercased())"
         content.subtitle     = "Take \(medicine.dosageText) now"
         content.body         = "You snoozed this. Time to take it!"
         content.sound        = resolvedSound()
-        content.badge        = 1
+        content.badge        = (settings?.badgeCount ?? true) ? 1 : nil
         content.userInfo     = ["medicineID": medicine.id.uuidString]
         content.categoryIdentifier = "MEDICINE_REMINDER"
 
@@ -122,14 +130,16 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // Schedules up to 10 follow-up notifications, 5 minutes apart, for the current alarm session.
-    // Only runs if the user has "Repeat until confirmed" enabled in Settings.
-    // All repeat notifications are cancelled when the user confirms they have taken the medicine.
+    // Schedules up to N follow-up notifications, 5 minutes apart, for the current
     func scheduleRepeatReminders(for medicine: Medicine) {
-        guard settings?.repeatUntilConfirmed == true else { return }
+        cancelRepeatReminders(for: medicine)
+
+        guard settings?.repeatUntilConfirmed == true,
+              settings?.notificationsEnabled ?? true else { return }
+
         let content = buildContent(for: medicine, isTest: false)
 
-        for i in 1...10 {
+        for i in 1...repeatReminderCount {
             let trigger = UNTimeIntervalNotificationTrigger(
                 timeInterval: Double(i) * 300,
                 repeats: false
@@ -153,17 +163,36 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             "test-\(medicine.id)",
             "snooze-\(medicine.id)"
         ]
-        for i in 1...10 {
+        for i in 1...repeatReminderCount {
             ids.append("repeat-\(medicine.id)-\(i)")
         }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
     }
 
-    // Cancels all recurring weekly notifications for a medicine.
-    // Called when a medicine is deleted or its schedule is being replaced.
+    // Cancels all recurring + temporary notifications for a medicine SYNCHRONOUSLY.
     func cancelNotifications(for medicine: Medicine) {
-        let ids = medicine.reminderDays.map { "\(medicine.id.uuidString)-day\($0)" }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        var ids: [String] = []
+
+        for day in 1...7 {
+            ids.append("\(medicine.id.uuidString)-day\(day)")
+        }
+
+        // Temporary notifications.
+        ids.append("test-\(medicine.id)")
+        ids.append("snooze-\(medicine.id)")
+        for i in 1...repeatReminderCount {
+            ids.append("repeat-\(medicine.id)-\(i)")
+        }
+
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
+    // Removes only the repeat reminders for a medicine.
+    private func cancelRepeatReminders(for medicine: Medicine) {
+        let ids = (1...repeatReminderCount).map { "repeat-\(medicine.id)-\($0)" }
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: ids)
     }
 
     // MARK: - Notification Categories
@@ -172,7 +201,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     func setupNotificationCategories() {
         let confirmAction = UNNotificationAction(
             identifier: "CONFIRM",
-            title:      "✅ Taken",
+            title:      "Taken",
             options:    [.foreground]
         )
         let snoozeAction = UNNotificationAction(
@@ -199,7 +228,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             ? "Don't forget your medication! Open the app to confirm."
             : "\(medicine.notes) — Open the app to confirm."
         content.sound        = resolvedSound()
-        content.badge        = 1
+        content.badge        = (settings?.badgeCount ?? true) ? 1 : nil
         content.userInfo     = ["medicineID": medicine.id.uuidString, "isTest": isTest]
         content.categoryIdentifier = "MEDICINE_REMINDER"
         return content
@@ -217,7 +246,6 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // Used only for testing — schedules a notification 5 seconds from now
-    // with isTest: true so it does not trigger the in-app alarm screen.
     func scheduleTestNotification(for medicine: Medicine) {
         let content = buildContent(for: medicine, isTest: true)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)

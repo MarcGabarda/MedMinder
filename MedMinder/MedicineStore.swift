@@ -3,21 +3,24 @@ import SwiftData
 
 // MARK: - Medicine Store
 // Responsible for reading and writing Medicine objects to SwiftData,
-// and coordinating with NotificationManager when medicines are added, edited, or removed.
 @Observable
 class MedicineStore {
 
     var medicines: [Medicine] = []
 
     // The SwiftData context is injected at launch via configure(with:).
-    // It is optional only because it cannot be set during init — the container
-    // must be created first in MedReminderApp before it can be passed here.
     private var context: ModelContext?
+
+    // Tracks whether the store has already been configured so we don't
+    // reload from disk every time ContentView re-appears.
+    private var isConfigured = false
 
     // MARK: - Setup
 
     func configure(with context: ModelContext) {
+        guard !isConfigured else { return }
         self.context = context
+        isConfigured = true
         loadMedicines()
     }
 
@@ -38,17 +41,22 @@ class MedicineStore {
 
     // MARK: - CRUD
 
+    // Inserts a new medicine into SwiftData, then refreshes the in-memory array
+    // from the database to avoid duplicates and keep sort order correct.
     func add(_ medicine: Medicine) {
         guard let context else { return }
         context.insert(medicine)
         save()
-        medicines.append(medicine)
+        loadMedicines()
         NotificationManager.shared.scheduleNotifications(for: medicine)
     }
 
-    /// Updates an existing medicine's properties and reschedules its notifications.
+    // Saves changes, then re-assigns the array element
     func update(_ medicine: Medicine) {
         save()
+        if let index = medicines.firstIndex(where: { $0.id == medicine.id }) {
+            medicines[index] = medicine
+        }
         NotificationManager.shared.scheduleNotifications(for: medicine)
     }
 
@@ -60,10 +68,10 @@ class MedicineStore {
         medicines.removeAll { $0.id == medicine.id }
     }
 
+    // Collects medicines to delete first, then removes them to avoid mutating
     func delete(at offsets: IndexSet) {
-        for index in offsets {
-            delete(medicines[index])
-        }
+        let toDelete = offsets.map { medicines[$0] }
+        toDelete.forEach { delete($0) }
     }
 
     func deleteByIDs(_ ids: Set<UUID>) {

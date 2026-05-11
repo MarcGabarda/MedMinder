@@ -1,7 +1,6 @@
 import SwiftUI
 
 // Distinguishes between creating a new medicine and editing an existing one.
-// The edit case carries the medicine being edited so its values can be pre-filled.
 enum FormMode {
     case add
     case edit(Medicine)
@@ -61,7 +60,9 @@ struct AddEditMedicineView: View {
                     Button("Cancel") { dismiss() }.foregroundStyle(.indigo)
                 }
             }
-            .onAppear(perform: loadExistingValues)
+            // .task runs once when the sheet appears — won't re-fire on
+            // intermediate re-renders, so user input is never clobbered.
+            .task { loadExistingValues() }
             .alert("Missing Info", isPresented: $showingValidationAlert) {
                 Button("OK", role: .cancel) {}
             } message: {

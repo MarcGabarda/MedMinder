@@ -8,7 +8,6 @@ struct MedReminderApp: App {
     @State private var settings = AppSettings()
 
     // The ModelContainer creates and manages the on-device SQLite database.
-    // Declared as a stored property so it persists for the lifetime of the app.
     let container: ModelContainer = {
         do {
             return try ModelContainer(for: Medicine.self)
@@ -30,7 +29,9 @@ struct MedReminderApp: App {
             ContentView()
                 .environment(store)
                 .environment(settings)
-                .onAppear {
+                // .task runs once when the view first appears and is cancelled when
+                // this ensures the database is loaded exactly once.
+                .task {
                     store.configure(with: container.mainContext)
                     NotificationManager.shared.settings = settings
                 }

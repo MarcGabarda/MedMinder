@@ -1,15 +1,18 @@
 import SwiftUI
+import AVFoundation
 
 // MARK: - Alarm View
 // Full-screen presentation shown when a medicine reminder fires.
-// All notification logic (confirm, snooze, repeat reminders) is handled by NotificationManager
+// Plays a looping alarm sound while visible, and schedules follow-up
+// notifications in case the user dismisses the app without confirming.
 struct AlarmView: View {
     let medicine:  Medicine
     let onDismiss: () -> Void
 
     @Environment(AppSettings.self) private var settings
-    @State private var pulse     = false
-    @State private var confirmed = false
+    @State private var pulse        = false
+    @State private var confirmed    = false
+    @State private var audioPlayer: AVAudioPlayer?
 
     var body: some View {
         ZStack {
@@ -31,8 +34,12 @@ struct AlarmView: View {
         }
         .onAppear {
             pulse = true
-            // Schedule follow-up reminders in case the user ignores this screen.
+            startAlarmSound()
             NotificationManager.shared.scheduleRepeatReminders(for: medicine)
+            triggerHaptic()
+        }
+        .onDisappear {
+            stopAlarmSound()
         }
     }
 
@@ -93,10 +100,11 @@ struct AlarmView: View {
 
     private var actionButtons: some View {
         VStack(spacing: 14) {
-            // Confirm cancels today's alarm and any repeat reminders, then dismisses
+            // Confirm cancels today's alarm and any repeat reminders, then dismisses.
             Button {
                 guard !confirmed else { return }
                 withAnimation(.spring(response: 0.3)) { confirmed = true }
+                stopAlarmSound()
                 NotificationManager.shared.confirmTaken(for: medicine)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { onDismiss() }
             } label: {
@@ -120,8 +128,9 @@ struct AlarmView: View {
             .disabled(confirmed)
 
             if !confirmed {
-                // Snooze schedules a new notification 10 minutes from now, then dismisses
+                // Snooze schedules a new notification 10 minutes from now, then dismisses.
                 Button {
+                    stopAlarmSound()
                     NotificationManager.shared.scheduleSnoozeNotification(for: medicine)
                     onDismiss()
                 } label: {
@@ -133,6 +142,58 @@ struct AlarmView: View {
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 40)
+    }
+
+    // MARK: - Audio Loop
+
+    // Plays the user's selected ringtone on loop until the alarm is dismissed.
+    private func startAlarmSound() {
+        // Map the user's ringtone preference to the bundled sound file.
+        // "Default" and "Urgent" fall back to the system sound (a short system tone)
+        let resourceName: String
+        switch settings.selectedRingtone {
+        case .gentle:  resourceName = "gentle"
+        case .chime:   resourceName = "chime"
+        case .urgent, .default: resourceName = "gentle" // fallback file
+        }
+
+        guard let url = Bundle.main.url(forResource: resourceName, withExtension: "caf")
+                     ?? Bundle.main.url(forResource: resourceName, withExtension: "wav")
+                     ?? Bundle.main.url(forResource: resourceName, withExtension: "mp3") else {
+            print("AlarmView: no sound file found for \(resourceName)")
+            return
+        }
+
+        do {
+            // .playback ignores the silent switch; .duckOthers lowers other audio while ringing.
+            try AVAudioSession.sharedInstance().setCategory(.playback, options: [.duckOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.numberOfLoops = -1   // loop forever until stopped
+            player.volume        = 1.0
+            player.prepareToPlay()
+            player.play()
+            audioPlayer = player
+        } catch {
+            print("AlarmView: failed to start alarm sound — \(error)")
+        }
+    }
+
+    private func stopAlarmSound() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+        // Release the audio session so other audio (music, podcasts) can resume.
+        try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+    }
+
+    // MARK: - Haptics
+
+    // Fires a single notification haptic on appear if the user has haptics enabled.
+    private func triggerHaptic() {
+        guard settings.hapticFeedback else { return }
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
     }
 }
 
